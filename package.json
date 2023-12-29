@@ -1,0 +1,23 @@
+{
+  "name": "notezilla-backend",
+  "version": "1.0.0",
+  "description": "NoteZilla is a NoteZilla",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GarvBhatt/NoteZilla-Backend.git"
+  },
+  "author": "Garv-Bhatt",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GarvBhatt/NoteZilla-Backend/issues"
+  },
+  "homepage": "https://github.com/GarvBhatt/NoteZilla-Backend#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3"
+  }
+}

@@ -1,12 +1,15 @@
 const exp = require("express");
+// here we have imported user module
 const User = require("../models/User");
 const {body, validationResult} = require("express-validator");
 const router = exp.Router();
 const bcrypt = require("bcryptjs");
+require('dotenv').config();
 const jwt = require("jsonwebtoken");
 
-router.post(
-  "/createUser",
+
+router.post("/register",
+// here we have performed the validation of the entered user detailed, if any error occured then validationResult will return the errors, then we will check if the results is empty then there are no errors and we can further process data else we will send error array in responce
   [
     body("fname","First Name must be at least 3 characters").isLength({ min: 3 }),
     body("lname","Last Name must be at least 3 characters").isLength({ min: 3 }),
@@ -16,42 +19,62 @@ router.post(
     body("password","Password must be at least 8 characters man").isLength({ min: 8 }),
     body("confirmPassword","Password must be at least 8 characters man").isLength({ min: 8 }),
   ],
+  // here is the asyncronous(because there are funtions inside this callback funtion which require waiting till they fetch/save/delete/process the data) callback funtion which will handle the registration post
     async (req, res) => {
+      // here we have surrounded it in a try catch block such that the exp.application won't crash insted it will keep running and we will get an error thrown in the console/in form of responce 
       try {
         const result = validationResult(req);
-        const jwt_secret="allMenMustDie";
-        const userexist = await User.findOne({email:req.body.email});
+        const jwt_secret = process.env.JWT_SECRET;
+        const userexistcheck = await User.findOne({email:req.body.email});
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,21}$/;
   
-        if(userexist)
+        // checking if user exist
+        if(userexistcheck)
         {
-          return res.status(400).json({"error":"email no no 2 2"});
+          return res.status(400).json({ error: "Email already in use" });
         }
+        // checking if password and confirmPassword matches
         if(req.body.password!==req.body.confirmPassword)
         {
-          return res.status(400).json({"error":"both password should match"});
+          return res.status(400).json({ error: "Passwords do not match" });
         }
+        // validation error check
         if (!result.isEmpty())
         {
           return res.status(400).send({ errors: result.array()});
         }
+        // password regex check
         if (!passwordRegex.test(req.body.password))
         {
-          return res.status(400).send({ errors: "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be at least 8 characters long."});
+          return res.status(400).json({error: "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and be at least 8 characters long."});
         }
 
+        // generateing salt to stuff it at the end of the password therefore password + salt
         const salt = await bcrypt.genSalt(10);
+
+        // stuffing salt at the end of the password therefore password + salt, and hasing it and assigning it to the req.body.password
         req.body.password = await bcrypt.hash(req.body.password,salt);
 
+        // createing a temporary user obj to save in db
         const user = await User({
           fname:req.body.fname,
           lname:req.body.lname,
           email:req.body.email,
           password:req.body.password,
         });
-        const jwtToken = jwt.sign({ id : user._id }, jwt_secret);
 
-        user.save().then(()=>{res.status(200).json({jwtToken});console.log(req.body.email+" saved")}).catch((err)=>{console.log(err);res.send(err+" email no no")});
+        // saving the user object in db
+        user.save()
+        .then(() => {
+            // signing the jwt token with the secret key
+            const jwtToken = jwt.sign({ id : user._id }, jwt_secret);
+            res.status(200).json({ jwtToken });
+            console.log(req.body.email + " saved");
+          })
+          .catch((err) => {
+            console.log(err);
+            res.status(500).send(err);
+          });
   }
   catch (error)
   {

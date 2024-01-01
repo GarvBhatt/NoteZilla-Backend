@@ -6,7 +6,8 @@ const router = exp.Router();
 const bcrypt = require("bcryptjs");
 require('dotenv').config();
 const jwt = require("jsonwebtoken");
-
+const fetchUser = require("../middleware/fetchUser");
+const jwt_secret = process.env.JWT_SECRET;
 
 router.post("/register",
 // here we have performed the validation of the entered user detailed, if any error occured then validationResult will return the errors, then we will check if the results is empty then there are no errors and we can further process data else we will send error array in responce
@@ -20,14 +21,13 @@ router.post("/register",
     body("confirmPassword","Password must be at least 8 characters man").isLength({ min: 8 }),
   ],
   // here is the asyncronous(because there are funtions inside this callback funtion which require waiting till they fetch/save/delete/process the data) callback funtion which will handle the registration post
-    async (req, res) => {
+  async (req, res) => {
       // here we have surrounded it in a try catch block such that the exp.application won't crash insted it will keep running and we will get an error thrown in the console/in form of responce 
       try {
         const result = validationResult(req);
-        const jwt_secret = process.env.JWT_SECRET;
         const userexistcheck = await User.findOne({email:req.body.email});
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,21}$/;
-  
+        
         // checking if user exist
         if(userexistcheck)
         {
@@ -54,7 +54,7 @@ router.post("/register",
 
         // stuffing salt at the end of the password therefore password + salt, and hasing it and assigning it to the req.body.password
         req.body.password = await bcrypt.hash(req.body.password,salt);
-
+        
         // createing a temporary user obj to save in db
         const user = await User({
           fname:req.body.fname,
@@ -75,10 +75,53 @@ router.post("/register",
             console.log(err);
             res.status(500).send(err);
           });
+        }
+        catch (error)
+        {
+          res.status(500).send(error.message);
+        }
+});
+
+router.post("/login", [
+  body("email","Email Must be an email - captain obvious").isEmail(),
+  body("password","Password must not be blank").exists(),
+],
+async (req,res)=>{
+  try {
+    const result = validationResult(req);
+    if (!result.isEmpty())
+    {
+      return res.status(400).send({ errors: result.array()});
+    }
+
+    const {email,password} = req.body;
+    const user = await User.findOne({email});
+
+    if(!user || !await bcrypt.compare(password,user.password))
+    {
+      return res.status(404).json({error:"invalid login credentials"});
+    }
+      
+    const jwtToken = jwt.sign({ id : user._id }, jwt_secret);
+    res.status(200).json({ jwtToken });
   }
-  catch (error)
+  catch (error) {
+    console.error(error);
+    res.status(500).json({error:error.message});
+  }
+});
+
+router.post("/getUser",fetchUser,async(req,res)=>{
+  try
   {
-    res.status(500).send(error.message);
+    const userId  = req.user.id;
+    console.log(userId);
+    const userdetails = await User.findById(userId).select("-password");
+    res.status(200).send(userdetails);
+  }
+  catch (error){
+    console.error(error);
+    res.status(500).json({error:error.message});
   }
 });
 

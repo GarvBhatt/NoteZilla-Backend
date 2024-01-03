@@ -23,7 +23,8 @@ router.post("/addNote", fetchUser ,async (req,res)=>{
         const note  = await new Note({
             title:req.body.title,
             discription:req.body.discription,
-            tag:req.body.tag,
+            priorityLevel:req.body.priorityLevel,
+            expectedDate:req.body.expectedDate,
             user:userId
         });
         
@@ -66,8 +67,12 @@ router.put("/updateNote/:id", fetchUser ,async (req,res)=>{
           note.description = req.body.description;
         }
 
-        if (req.body.tag) {
-          note.tag = req.body.tag;
+        if (req.body.priorityLevel) {
+          note.priorityLevel = req.body.priorityLevel;
+        }
+
+        if (req.body.expectedDate) {
+          note.expectedDate = req.body.expectedDate;
         }
 
         note.save()
@@ -103,7 +108,7 @@ router.delete("/deleteNote/:id", fetchUser ,async (req,res)=>{
 
         note.deleteOne()
         .then(() => {
-            res.status(200).send(note.title + "Deleted");
+            res.status(200).send(note.title + " Deleted");
             console.log(note.title + " deleted");
           })
           .catch((err) => {

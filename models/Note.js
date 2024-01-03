@@ -8,15 +8,17 @@ const noteSchema = new mongoose.Schema({
     title:{
         type:String,
         required:true
-        // unique:true
     },
     discription:{
         type:String,
         required:true
     },
-    tag:{
+    priorityLevel:{
         type:String,
-        default:"General"
+        default:"Low"
+    },
+    expectedDate:{
+        type:String,
     },
     Date:{
         type:Date,
@@ -24,4 +26,4 @@ const noteSchema = new mongoose.Schema({
     }
 });
 
-module.exports = new mongoose.model("noteObj",noteSchema);
+module.exports = new mongoose.model("Notes",noteSchema);

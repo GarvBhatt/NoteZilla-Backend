@@ -1,11 +1,13 @@
 const exp = require("express");
 const conn = require("./db");
+const cors = require("cors");
 const port = 8000;
 
 const app =  exp();
-conn();
+conn().catch(console.dir);
 
 app.use(exp.json());
+app.use(cors());
 
 app.get("/",(req,res)=>{
     res.status(200).send("Hello children");

@@ -22,7 +22,7 @@ router.post("/addNote", fetchUser ,async (req,res)=>{
         const userId = req.user.id;
         const note  = await new Note({
             title:req.body.title,
-            discription:req.body.discription,
+            description:req.body.description,
             priorityLevel:req.body.priorityLevel,
             expectedDate:req.body.expectedDate,
             user:userId
@@ -108,7 +108,7 @@ router.delete("/deleteNote/:id", fetchUser ,async (req,res)=>{
 
         note.deleteOne()
         .then(() => {
-            res.status(200).send(note.title + " Deleted");
+            res.status(200).json({message:`${note.title} + Deleted`});
             console.log(note.title + " deleted");
           })
           .catch((err) => {

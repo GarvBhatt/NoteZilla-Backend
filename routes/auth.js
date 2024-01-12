@@ -10,7 +10,7 @@ const fetchUser = require("../middleware/fetchUser");
 const jwt_secret = process.env.JWT_SECRET;
 
 router.post("/register",
-// here we have performed the validation of the entered user detailed, if any error occured then validationResult will return the errors, then we will check if the results is empty then there are no errors and we can further process data else we will send error array in responce
+// here we have performed the validation of the entered user detailed, if any error occured then validationResult will return the errors, then we will check if the results is empty then there are no error and we can further process data else we will send error array in responce
   [
     body("fname","First Name must be at least 3 characters").isLength({ min: 3 }),
     body("lname","Last Name must be at least 3 characters").isLength({ min: 3 }),
@@ -41,7 +41,7 @@ router.post("/register",
         // validation error check
         if (!result.isEmpty())
         {
-          return res.status(400).send({ errors: result.array()});
+          return res.status(400).json({ error: result.array()});
         }
         // password regex check
         if (!passwordRegex.test(req.body.password))
@@ -51,7 +51,7 @@ router.post("/register",
 
         // generateing salt to stuff it at the end of the password therefore password + salt
         const salt = await bcrypt.genSalt(10);
-
+        
         // stuffing salt at the end of the password therefore password + salt, and hasing it and assigning it to the req.body.password
         req.body.password = await bcrypt.hash(req.body.password,salt);
         
@@ -62,7 +62,7 @@ router.post("/register",
           email:req.body.email,
           password:req.body.password,
         });
-
+        
         // saving the user object in db
         user.save()
         .then(() => {
@@ -91,7 +91,7 @@ async (req,res)=>{
     const result = validationResult(req);
     if (!result.isEmpty())
     {
-      return res.status(400).send({ errors: result.array()});
+      return res.status(400).send({ error: result.array()});
     }
 
     const {email,password} = req.body;

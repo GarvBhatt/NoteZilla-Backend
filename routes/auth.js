@@ -139,6 +139,7 @@ router.post("/tokenChecker", async (req, res) => {
     return res.status(200).json({message:true});
   } catch (error) {
     console.error("Token verification failed:", error.message);
+    return res.status(500).json({error:"Session expired, Please login again"});
   }
 });
 

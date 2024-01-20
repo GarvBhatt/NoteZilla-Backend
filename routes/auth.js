@@ -132,12 +132,12 @@ router.post("/tokenChecker", async (req, res) => {
 
     if(isTokenExpired)
     {
-      return res.status(401).json({error:"Session expired, Please login again"});
+      return res.status(200).json({error:"Session expired, Please login again"});
     }
     return res.status(200).json({message:true});
   } catch (error) {
     console.error("Token verification failed:", error.message);
-    return res.status(401).json({error:"Session expired, Please login again"});
+    return res.status(200).json({error:"Session expired, Please login again"});
   }
 });
 

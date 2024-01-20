@@ -128,7 +128,9 @@ router.post("/getUser",fetchUser,async(req,res)=>{
 router.post("/tokenChecker", async (req, res) => {
   try {
     const decoded = jwt.verify(req.body.jwtToken, jwt_secret);
+    console.log(decoded);
     const isTokenExpired = decoded.exp < Date.now() / 1000;
+    console.log(isTokenExpired);
 
     if(isTokenExpired)
     {

@@ -52,7 +52,7 @@ router.post("/register",
         // generateing salt to stuff it at the end of the password therefore password + salt
         const salt = await bcrypt.genSalt(10);
         
-        // stuffing salt at the end of the password therefore password + salt, and hasing it and assigning it to the req.body.password
+        // stuffing salt at the end of the password therefore password + salt, and hashing it and assigning it to the req.body.password
         req.body.password = await bcrypt.hash(req.body.password,salt);
         
         // createing a temporary user obj to save in db
@@ -102,7 +102,7 @@ async (req,res)=>{
       return res.status(404).json({error:"invalid login credentials"});
     }
       
-    const jwtToken = jwt.sign({ id : user._id }, jwt_secret, { expiresIn: "1m" });
+    const jwtToken = jwt.sign({ id : user._id }, jwt_secret, { expiresIn: "6h" });
     res.status(200).json({ jwtToken });
   }
   catch (error) {
@@ -135,7 +135,9 @@ router.post("/tokenChecker", async (req, res) => {
       return res.status(200).json({error:"Session expired, Please login again"});
     }
     return res.status(200).json({message:true});
-  } catch (error) {
+  }
+  catch (error)
+  {
     console.error("Token verification failed:", error.message);
     return res.status(200).json({error:"Session expired, Please login again"});
   }
